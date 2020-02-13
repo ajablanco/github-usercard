@@ -3,18 +3,32 @@
            https://api.github.com/users/<your name>
 */
 
-axios.get('https://api.github.com/users/ajablanco')
-  .then( response => {
-    // Remember response is an object, response.data is an array.
-    response.data.forEach( item => {
-        let button = buttonCreator(item);
-        parent.appendChild(button);
-    })
-  })
-  .catch( error => {
-    console.log("Error:", err);
-  })
+const container = document.querySelector('.cards');
 
+axios.get("https://api.github.com/users/ajablanco")
+  .then(response => {
+    // console.log(response);
+    container.prepend(cardCreator(response.data));
+  })
+  .catch(error => {
+    console.log(error);
+  });
+
+  
+
+  axios.get(`https://api.github.com/users/ajablanco/followers`)
+  .then(function(res) {
+    res.data.forEach((follower, i)=> {
+      axios.get(`https://api.github.com/users/${follower.login}`).then((res) => {
+        document.querySelector(".cards").appendChild(cardCreator(res.data, i))
+      }).catch((err) =>{
+        console.log(err)
+      })
+    });
+  })
+  .catch(function(err) {
+    console.log(err);
+  });
 
 
 
@@ -29,27 +43,6 @@ axios.get('https://api.github.com/users/ajablanco')
            create a new component and add it to the DOM as a child of .cards
 */
 
-const arr = [{
-  login: "ajablanco",
-  url: "https://api.github.com/users/ajablanco",
-  avatar_url: "https://avatars0.githubusercontent.com/u/59661417?v=4",
-  name: "Aja Blanco",
-  location: "Oceanside, CA",
-  bio: "Owner at Dear Self",
-  followers: 0,
-  following: 0,
-},
-{
-  login: "tetondan",
-  url: "https://api.github.com/users/tetondan",
-  avatar_url: "https://avatars2.githubusercontent.com/u/8883343?v=4",
-  name: "Daniel Frehner",
-  location: "Jackson Hole, Wy",
-  bio: "Program Manager (PT Web) @ Lambda School\r\n",
-  followers: 103,
-  following: 8,
-}]
-
 
 
 /* Step 5: Now that you have your own card getting added to the DOM, either 
@@ -62,7 +55,13 @@ const arr = [{
           user, and adding that card to the DOM.
 */
 
-const followersArray = [];
+// const followersArray = [{
+//   tetondan,
+//   dustinmyers,
+//   justsml,
+//   luishrd,
+//   bigknell
+// }];
 
 /* Step 3: Create a function that accepts a single object as its only argument,
           Using DOM methods and properties, create a component that will return the following DOM element:
@@ -89,7 +88,8 @@ const followersArray = [];
   bigknell
 */
 
-function cardCreator(name1, username1, location1, url, bio1, followers1, following1, avatarUrl) {
+function cardCreator(obj) {
+  const container = document.createElement('div')
   const card = document.createElement('div');
   const cardImg = document.createElement('img');
   const cardInfo = document.createElement('div');
@@ -97,47 +97,54 @@ function cardCreator(name1, username1, location1, url, bio1, followers1, followi
   const username = document.createElement('p');
   const location = document.createElement('p');
   const profile = document.createElement('p');
-  const address = document.createElement('a')
+  const a = document.createElement('a');
   const followers = document.createElement('p');
   const following = document.createElement('p');
   const bio = document.createElement('p');
+  const calDiv = document.createElement("div");
+  
+
+ 
 
   card.classList.add('card');
   cardInfo.classList.add('card-info');
   name.classList.add('name');
   username.classList.add('username');
-
+  a.classList.add('address');
+  calDiv.classList.add("calendar");
+  
+  container.appendChild(card);
   card.appendChild(cardImg);
   card.appendChild(cardInfo);
   cardInfo.appendChild(name);
   cardInfo.appendChild(username);
   cardInfo.appendChild(location);
   cardInfo.appendChild(profile);
-  profile.appendChild(address);
+  
   cardInfo.appendChild(followers);
   cardInfo.appendChild(following);
   cardInfo.appendChild(bio);
+  container.appendChild(calDiv);
+  
+  // calDiv.appendChild(calendar);
 
-  name.textContent = name1;
-  username.textContent = username1;
-  location.textContent = location1;
-  bio.textContent = bio1;
-  followers.textContent = followers1;
-  following.textContent = following1;
+  name.textContent = obj.name;
+  username.textContent = obj.login;
+  location.textContent = `Location: ${obj.location}`;
+  profile.textContent = "Profile: ";
+  a.textContent = obj.html_url;
+  bio.textContent = `Bio: ${obj.bio}`;
+  bio.style.width = "200px";
+  followers.textContent = `Followers: ${obj.followers}`;
+  following.textContent = `Following: ${obj.following}`;
+  cardImg.src = obj.avatar_url;
+  profile.appendChild(a);
+  a.style.color = "blue";
+  a.href= obj.html_url;
+  a.style.fontSize = "1.3rem";
 
 
-  cardImg.src = avatarUrl;
-
-
+  new GitHubCalendar(".calendar", obj.login);
+  calDiv.style.width = "500px";
   return card;
 }
-
-const container = document.querySelector('.cards');
-
-arr.forEach(data => {
-  container.appendChild(cardCreator(data.name, data.login, data.url, data.location, data.bio, data.followers, data.following, data.avatar_url));
-})
-
-
-
-
