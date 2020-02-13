@@ -18,9 +18,9 @@ axios.get("https://api.github.com/users/ajablanco")
 
   axios.get(`https://api.github.com/users/ajablanco/followers`)
   .then(function(res) {
-    res.data.forEach((follower, i)=> {
+    res.data.forEach((follower)=> {
       axios.get(`https://api.github.com/users/${follower.login}`).then((res) => {
-        document.querySelector(".cards").appendChild(cardCreator(res.data, i))
+        container.appendChild(cardCreator(res.data))
       }).catch((err) =>{
         console.log(err)
       })
@@ -89,7 +89,8 @@ axios.get("https://api.github.com/users/ajablanco")
 */
 
 function cardCreator(obj) {
-  const container = document.createElement('div')
+
+  
   const card = document.createElement('div');
   const cardImg = document.createElement('img');
   const cardInfo = document.createElement('div');
@@ -101,7 +102,8 @@ function cardCreator(obj) {
   const followers = document.createElement('p');
   const following = document.createElement('p');
   const bio = document.createElement('p');
-  const calDiv = document.createElement("div");
+
+  const contribution = document.createElement("div");
   
 
  
@@ -111,11 +113,14 @@ function cardCreator(obj) {
   name.classList.add('name');
   username.classList.add('username');
   a.classList.add('address');
-  calDiv.classList.add("calendar");
+  contribution.classList.add("calendar");
+
+  GitHubCalendar(contribution, obj.login, {responsive:true});
   
-  container.appendChild(card);
+  document.querySelector('.cards').appendChild(card);
   card.appendChild(cardImg);
   card.appendChild(cardInfo);
+  card.appendChild(contribution);
   cardInfo.appendChild(name);
   cardInfo.appendChild(username);
   cardInfo.appendChild(location);
@@ -124,7 +129,7 @@ function cardCreator(obj) {
   cardInfo.appendChild(followers);
   cardInfo.appendChild(following);
   cardInfo.appendChild(bio);
-  container.appendChild(calDiv);
+
   
   // calDiv.appendChild(calendar);
 
@@ -134,17 +139,14 @@ function cardCreator(obj) {
   profile.textContent = "Profile: ";
   a.textContent = obj.html_url;
   bio.textContent = `Bio: ${obj.bio}`;
-  bio.style.width = "200px";
+  bio.style.width = "250px";
   followers.textContent = `Followers: ${obj.followers}`;
   following.textContent = `Following: ${obj.following}`;
   cardImg.src = obj.avatar_url;
   profile.appendChild(a);
   a.style.color = "blue";
   a.href= obj.html_url;
-  a.style.fontSize = "1.3rem";
+  a.style.fontSize = "1.8rem";
 
-
-  new GitHubCalendar(".calendar", obj.login);
-  calDiv.style.width = "500px";
   return card;
 }
